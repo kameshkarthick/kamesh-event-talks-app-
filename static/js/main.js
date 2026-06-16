@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const notesGrid = document.getElementById('notes-grid');
     const refreshBtn = document.getElementById('refresh-btn');
     const refreshIcon = document.getElementById('refresh-icon');
+    const exportCsvBtn = document.getElementById('export-csv-btn');
     const cacheTimeDisplay = document.getElementById('cache-time');
     const searchInput = document.getElementById('search-input');
     const selectedBadge = document.getElementById('selected-badge');
@@ -44,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Listeners
     refreshBtn.addEventListener('click', () => fetchNotes(true));
+    exportCsvBtn.addEventListener('click', exportToCSV);
     searchInput.addEventListener('input', handleSearch);
     closeComposerBtn.addEventListener('click', deselectNote);
     tweetTextarea.addEventListener('input', updateCharCount);
@@ -213,6 +215,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                                 <span>Tweet</span>
                             </button>
+                            <button class="btn-card-action copy-action" data-action="copy">
+                                <i data-lucide="copy"></i>
+                                <span>Copy</span>
+                            </button>
                             <a href="${note.link}" target="_blank" class="btn-card-action link-action" style="text-decoration: none;">
                                 <i data-lucide="external-link"></i>
                                 <span>Details</span>
@@ -228,6 +234,17 @@ document.addEventListener('DOMContentLoaded', () => {
             card.addEventListener('click', (e) => {
                 // If they clicked the details link (external link icon), let standard link navigation happen
                 if (e.target.closest('.link-action')) {
+                    return;
+                }
+                
+                // If they clicked the copy button, copy the content and prevent selection!
+                const copyBtn = e.target.closest('.copy-action');
+                if (copyBtn) {
+                    const noteId = card.dataset.id;
+                    const noteObj = allNotes.find(n => n.id === noteId);
+                    if (noteObj) {
+                        copyNoteToClipboard(noteObj, copyBtn);
+                    }
                     return;
                 }
                 
@@ -353,5 +370,67 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
         window.open(twitterIntentUrl, '_blank');
+    }
+
+    // Copy single note text content to clipboard with visual feedback
+    function copyNoteToClipboard(note, buttonElement) {
+        const textToCopy = `BigQuery ${note.type} Update (${note.date}):\n${note.text}\n\nRead more: ${note.link}`;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const span = buttonElement.querySelector('span');
+            const icon = buttonElement.querySelector('i');
+            
+            const originalText = span.textContent;
+            span.textContent = "Copied!";
+            buttonElement.style.color = "#10b981"; // green accent
+            
+            if (icon) {
+                icon.setAttribute('data-lucide', 'check');
+                if (window.lucide) window.lucide.createIcons();
+            }
+            
+            setTimeout(() => {
+                span.textContent = originalText;
+                buttonElement.style.color = "";
+                if (icon) {
+                    icon.setAttribute('data-lucide', 'copy');
+                    if (window.lucide) window.lucide.createIcons();
+                }
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+            alert('Could not copy to clipboard.');
+        });
+    }
+
+    // Export currently filtered list of notes to a standard CSV file
+    function exportToCSV() {
+        if (filteredNotes.length === 0) {
+            alert("No notes available to export.");
+            return;
+        }
+        
+        const headers = ['Date', 'Type', 'Content', 'Source Link'];
+        const rows = filteredNotes.map(note => [
+            note.date,
+            note.type,
+            note.text,
+            note.link
+        ]);
+        
+        // Wrap cells in double quotes and escape double quotes
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
+        ].join('\r\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `bigquery_release_notes_${currentFilter}_export.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 });
