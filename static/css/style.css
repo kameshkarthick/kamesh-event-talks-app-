@@ -40,6 +40,54 @@
     --font-heading: 'Outfit', var(--font-sans);
 }
 
+body.light-theme {
+    --bg-base: #f8fafc;
+    --bg-sidebar: #f1f5f9;
+    --bg-surface: #ffffff;
+    --bg-surface-hover: #f8fafc;
+    --bg-surface-active: #e2e8f0;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --border-color-hover: rgba(0, 0, 0, 0.16);
+    
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    --primary: #2563eb;
+    --primary-glow: rgba(37, 99, 235, 0.15);
+    --primary-hover: #1d4ed8;
+    
+    --x-color: #ffffff;
+    --x-bg: #0f1419;
+    --x-bg-hover: #272c30;
+
+    --color-feature-glow: rgba(16, 185, 129, 0.15);
+    --color-issue-glow: rgba(244, 63, 94, 0.15);
+    --color-deprecation-glow: rgba(168, 85, 247, 0.15);
+    --color-change-glow: rgba(245, 158, 11, 0.15);
+    --color-other-glow: rgba(100, 116, 139, 0.15);
+}
+
+/* Specific elements background adjustments for light theme */
+body.light-theme .feed-info-card,
+body.light-theme .stat-item,
+body.light-theme .tag-btn {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+body.light-theme #tweet-textarea {
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
+body.light-theme .card-body code {
+    background-color: rgba(0, 0, 0, 0.06);
+    color: #0f172a;
+}
+
+body.light-theme .selected-update-preview {
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
 /* Reset & Base Styles */
 * {
     margin: 0;
@@ -234,6 +282,41 @@ body {
 
 .btn-secondary:active {
     transform: translateY(0);
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.theme-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border-color: var(--border-color-hover);
+    transform: translateY(-1px);
+}
+
+body.light-theme .theme-toggle-btn:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.theme-toggle-btn:active {
+    transform: translateY(0);
+}
+
+.theme-toggle-btn svg {
+    width: 18px;
+    height: 18px;
 }
 
 #refresh-icon.spinning {

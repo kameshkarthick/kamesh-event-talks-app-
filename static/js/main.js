@@ -19,6 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const selectedBadge = document.getElementById('selected-badge');
     
+    // Theme Toggle Elements
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIconSun = document.getElementById('theme-icon-sun');
+    const themeIconMoon = document.getElementById('theme-icon-moon');
+    
     // Stats Elements
     const statTotal = document.getElementById('stat-total');
     const statFeatures = document.getElementById('stat-features');
@@ -41,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     charProgress.style.strokeDashoffset = ringCircumference;
 
     // Initialize UI
+    initTheme();
     fetchNotes(false);
 
     // Event Listeners
@@ -50,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     closeComposerBtn.addEventListener('click', deselectNote);
     tweetTextarea.addEventListener('input', updateCharCount);
     tweetBtn.addEventListener('click', publishTweet);
+    themeToggleBtn.addEventListener('click', toggleTheme);
 
     // Category filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -432,5 +439,33 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // Initialize the page theme from localStorage (defaults to dark theme)
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+            themeIconSun.style.display = 'none';
+            themeIconMoon.style.display = 'block';
+        } else {
+            document.body.classList.remove('light-theme');
+            themeIconSun.style.display = 'block';
+            themeIconMoon.style.display = 'none';
+        }
+    }
+
+    // Toggle theme state between light and dark
+    function toggleTheme() {
+        const isLight = document.body.classList.toggle('light-theme');
+        if (isLight) {
+            localStorage.setItem('theme', 'light');
+            themeIconSun.style.display = 'none';
+            themeIconMoon.style.display = 'block';
+        } else {
+            localStorage.setItem('theme', 'dark');
+            themeIconSun.style.display = 'block';
+            themeIconMoon.style.display = 'none';
+        }
     }
 });
