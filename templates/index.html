@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Hub</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons for premium feel -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation & Stats -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                </div>
+                <h1>BQ Updates</h1>
+            </div>
+
+            <div class="feed-info-card">
+                <div class="info-row">
+                    <span class="info-label">Source</span>
+                    <span class="info-value">BigQuery Atom Feed</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status</span>
+                    <span class="info-value status-online">
+                        <span class="pulse-dot"></span> Online
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last Checked</span>
+                    <span id="cache-time" class="info-value">Never</span>
+                </div>
+                <button id="refresh-btn" class="btn btn-primary btn-full">
+                    <i data-lucide="rotate-cw" id="refresh-icon"></i>
+                    <span>Refresh Feed</span>
+                </button>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="filter-section">
+                <h3>Filter by Category</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-type="all">
+                        <span class="dot all-dot"></span> All Updates
+                    </button>
+                    <button class="filter-btn" data-type="Feature">
+                        <span class="dot feature-dot"></span> Features
+                    </button>
+                    <button class="filter-btn" data-type="Issue">
+                        <span class="dot issue-dot"></span> Issues
+                    </button>
+                    <button class="filter-btn" data-type="Deprecation">
+                        <span class="dot deprecation-dot"></span> Deprecations
+                    </button>
+                    <button class="filter-btn" data-type="Change">
+                        <span class="dot change-dot"></span> Changes
+                    </button>
+                    <button class="filter-btn" data-type="other">
+                        <span class="dot other-dot"></span> Others
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="stats-card">
+                <h3>Feed Overview</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-num" id="stat-total">0</div>
+                        <div class="stat-lbl">Total</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num" id="stat-features">0</div>
+                        <div class="stat-lbl">Features</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="search-wrapper">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Search update content, keywords, date..." autocomplete="off">
+                </div>
+                <div class="header-actions">
+                    <span class="selected-count-badge" id="selected-badge" style="display: none;">
+                        <span class="badge-dot"></span> 1 Update Selected
+                    </span>
+                </div>
+            </header>
+
+            <!-- Release Notes List Container -->
+            <div class="notes-container">
+                <!-- Loader State -->
+                <div id="loader" class="loader-state">
+                    <div class="spinner"></div>
+                    <p>Fetching BigQuery release notes...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <i data-lucide="inbox" class="empty-icon"></i>
+                    <h3>No updates found</h3>
+                    <p>Try adjusting your search keywords or filters.</p>
+                </div>
+
+                <!-- Cards Grid -->
+                <div id="notes-grid" class="notes-grid"></div>
+            </div>
+        </main>
+
+        <!-- Twitter/X Composer Panel -->
+        <aside class="composer-panel" id="composer-panel">
+            <div class="composer-header">
+                <div class="composer-title">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="x-logo"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    <span>Tweet Composer</span>
+                </div>
+                <button class="close-composer-btn" id="close-composer" title="Deselect update">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div class="composer-body">
+                <div class="selected-update-preview">
+                    <div class="preview-meta">
+                        <span class="preview-type" id="preview-type-badge">Feature</span>
+                        <span class="preview-date" id="preview-date-lbl">June 15, 2026</span>
+                    </div>
+                    <div class="preview-content" id="preview-content-text">
+                        Select an update from the list to draft your tweet.
+                    </div>
+                </div>
+
+                <div class="editor-section">
+                    <label for="tweet-textarea" class="editor-label">
+                        <span>Post Text</span>
+                        <span class="editor-help">Edit before posting</span>
+                    </label>
+                    <textarea id="tweet-textarea" placeholder="What's happening?"></textarea>
+                    
+                    <div class="editor-footer">
+                        <div class="char-counter">
+                            <svg class="progress-ring" width="24" height="24">
+                                <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.1)" stroke-width="2" fill="transparent" r="10" cx="12" cy="12"/>
+                                <circle class="progress-ring__circle" id="char-progress" stroke="#4285F4" stroke-width="2" fill="transparent" r="10" cx="12" cy="12"/>
+                            </svg>
+                            <span id="char-count">280</span>
+                        </div>
+                        <div class="quick-tags">
+                            <button class="tag-btn" data-tag="#BigQuery">#BigQuery</button>
+                            <button class="tag-btn" data-tag="#GoogleCloud">#GoogleCloud</button>
+                            <button class="tag-btn" data-tag="#DataAnalytics">#DataAnalytics</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="tweet-btn" class="btn btn-x btn-full">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right: 8px;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    <span>Post to X</span>
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
